@@ -2,7 +2,6 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,8 +11,6 @@ import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
     Util util = new Util();
-    Connection connection;
-    PreparedStatement ps;
 
     private static final String QUERY_NEW_TABLE = "CREATE TABLE users(id BIGINT AUTO_INCREMENT PRIMARY KEY," +
             "    name     varchar(45)  not null," +
@@ -26,41 +23,29 @@ public class UserDaoJDBCImpl implements UserDao {
     private static final String QUERY_CLEAN_TABLE = "TRUNCATE TABLE users";
 
     public UserDaoJDBCImpl() {
-
     }
 
     public void createUsersTable() throws SQLException {
-        try {
-            connection = util.getConnection();
-            ps = connection.prepareStatement(QUERY_NEW_TABLE);
+        try (Connection connection = util.getConnection();
+             PreparedStatement ps = connection.prepareStatement(QUERY_NEW_TABLE)) {
             ps.executeUpdate();
         } catch (SQLException e) {
             e.getStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
         }
     }
 
     public void dropUsersTable() throws SQLException {
-        try {
-            connection =util.getConnection();
-            ps = connection.prepareStatement(QUERY_REMOVE_TABLE);
+        try (Connection connection = util.getConnection();
+             PreparedStatement ps = connection.prepareStatement(QUERY_REMOVE_TABLE)) {
             ps.executeUpdate();
         } catch (SQLException e) {
             e.getStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
         }
     }
 
     public void saveUser(String name, String lastName, byte age) throws SQLException {
-        try {
-            connection = util.getConnection();
-            ps = connection.prepareStatement(QUERY_NEW_USER);
+        try (Connection connection = util.getConnection();
+             PreparedStatement ps = connection.prepareStatement(QUERY_NEW_USER)) {
             ps.setString(1, name);
             ps.setString(2, lastName);
             ps.setByte(3, age);
@@ -68,36 +53,25 @@ public class UserDaoJDBCImpl implements UserDao {
             System.out.println("User с именем - " + name + " добавлен в базу данных");
         } catch (SQLException e) {
             e.getStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
         }
-
     }
 
     public void removeUserById(long id) throws SQLException {
-        try {
-            connection = util.getConnection();
-            ps = connection.prepareStatement(QUERY_REMOVE_USER);
+        try (Connection connection = util.getConnection();
+             PreparedStatement ps = connection.prepareStatement(QUERY_REMOVE_USER)) {
             ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             e.getStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
         }
     }
 
     public List<User> getAllUsers() throws SQLException {
-        try {
-            connection = util.getConnection();
-            ps = connection.prepareStatement(QUERY_ALL_USERS);
-            ResultSet res = ps.executeQuery();
+        try (Connection connection = util.getConnection();
+             PreparedStatement ps = connection.prepareStatement(QUERY_ALL_USERS);
+             ResultSet res = ps.executeQuery()) {
             List<User> list = new ArrayList<>();
-            while(res.next()) {
+            while (res.next()) {
                 User user = new User();
                 user.setId(res.getLong("id"));
                 user.setName(res.getString("name"));
@@ -108,25 +82,16 @@ public class UserDaoJDBCImpl implements UserDao {
             return list;
         } catch (SQLException e) {
             e.getStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public void cleanUsersTable() throws SQLException {
-        try {
-            connection = util.getConnection();
-            ps = connection.prepareStatement(QUERY_CLEAN_TABLE);
+        try (Connection connection = util.getConnection();
+             PreparedStatement ps = connection.prepareStatement(QUERY_CLEAN_TABLE)) {
             ps.executeUpdate();
         } catch (SQLException e) {
             e.getStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
         }
     }
 }
